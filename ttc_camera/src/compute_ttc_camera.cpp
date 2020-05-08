@@ -2,11 +2,21 @@
 #include <numeric>
 #include <opencv2/core.hpp>
 
-
 #include "dataStructures.h"
 #include "structIO.hpp"
 
 using namespace std;
+
+double calcMedian(vector<double> &distRatios)
+{
+    std::sort(distRatios.begin(), distRatios.end());
+
+    int middleIndex = distRatios.size() / 2;
+
+    double median = distRatios.size() % 2 ? distRatios[middleIndex] : (distRatios[middleIndex] + distRatios[middleIndex + 1]) / 2;
+
+    return median;
+}
 
 // Compute time-to-collision (TTC) based on keypoint correspondences in successive images
 void computeTTCCamera(std::vector<cv::KeyPoint> &kptsPrev, std::vector<cv::KeyPoint> &kptsCurr,
@@ -51,10 +61,13 @@ void computeTTCCamera(std::vector<cv::KeyPoint> &kptsPrev, std::vector<cv::KeyPo
     }
 
     // compute camera-based TTC from distance ratios
-    double meanDistRatio = std::accumulate(distRatios.begin(), distRatios.end(), 0.0) / distRatios.size();
+    // double meanDistRatio = std::accumulate(distRatios.begin(), distRatios.end(), 0.0) / distRatios.size();
+
+    double medianDistRatio = calcMedian(distRatios);
 
     double dT = 1 / frameRate;
-    TTC = -dT / (1 - meanDistRatio);
+    // TTC = -dT / (1 - meanDistRatio);
+    TTC = -dT / (1 - medianDistRatio);
 
     // STUDENT TASK (replacement for meanDistRatio)
 }
@@ -63,11 +76,11 @@ int main()
 {
     vector<cv::KeyPoint> kptsSource, kptsRef;
     readKeypoints("../dat/C23A5_KptsSource_AKAZE.dat", kptsSource); // readKeypoints("./dat/C23A5_KptsSource_SHI-BRISK.dat"
-    readKeypoints("../dat/C23A5_KptsRef_AKAZE.dat", kptsRef); // readKeypoints("./dat/C23A5_KptsRef_SHI-BRISK.dat"
+    readKeypoints("../dat/C23A5_KptsRef_AKAZE.dat", kptsRef);       // readKeypoints("./dat/C23A5_KptsRef_SHI-BRISK.dat"
 
     vector<cv::DMatch> matches;
     readKptMatches("../dat/C23A5_KptMatches_AKAZE.dat", matches); // readKptMatches("./dat/C23A5_KptMatches_SHI-BRISK.dat", matches);
-    double ttc; 
+    double ttc;
     computeTTCCamera(kptsSource, kptsRef, matches, 10.0, ttc);
     cout << "ttc = " << ttc << "s" << endl;
 }
