@@ -2,7 +2,6 @@
 #include <opencv2/core.hpp>
 #include <opencv2/highgui.hpp>
 
-
 using namespace std;
 
 void changePixels()
@@ -17,6 +16,10 @@ void changePixels()
     {
         // STUDENT TASK : loop over all columns and set matrix elements to 255
 
+        for (int c = 0; c < ncols; c++)
+        {
+            m1_8u.at<int>(r, c) = 255;
+        }
     }
 
     // show result
@@ -25,7 +28,6 @@ void changePixels()
     cv::imshow(windowName, m1_8u);
     cv::waitKey(0); // wait for keyboard input before continuing
 }
-
 
 int main()
 {
