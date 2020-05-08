@@ -27,14 +27,21 @@ void loadImage3()
     // display images from the vector
     string windowName = "First steps in OpenCV";
     cv::namedWindow(windowName, 1); // create window
+
+    int imageNumber = 5;
     for (auto it = imgList.begin(); it != imgList.end(); ++it)
     {
 
         // STUDENT TASK : Prevent image 7 from being displayed
+        if (imageNumber != 7)
+        {
+            std::cout << imageNumber << "\n";
+            cv::imshow(windowName, *it);
+            cv::waitKey(0); // wait for keyboard input before continuing
+        }
+        imageNumber++;
 
         // display image
-        cv::imshow(windowName, *it);
-        cv::waitKey(0); // wait for keyboard input before continuing
     }
 }
 
