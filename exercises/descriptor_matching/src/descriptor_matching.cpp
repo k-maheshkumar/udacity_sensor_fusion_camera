@@ -43,11 +43,48 @@ void matchDescriptors(cv::Mat &imgSource, cv::Mat &imgRef, vector<cv::KeyPoint> 
         cout << " (NN) with n=" << matches.size() << " matches in " << 1000 * t / 1.0 << " ms" << endl;
     }
     else if (selectorType.compare("SEL_KNN") == 0)
-    { // k nearest neighbors (k=2)
+    {
+        // k nearest neighbors (k=2)
 
-        // TODO : implement k-nearest-neighbor matching
+        std::vector<std::vector<cv::DMatch>> knnMatches;
+        std::vector<cv::DMatch> knnMatchesFlatten;
+        int k = 2;
+        if (crossCheck)
+            k = 1;
+        double t = (double)cv::getTickCount();
+        // matcher->knnMatch(descSource, descRef, matches);
+        matcher->knnMatch(descSource, descRef, knnMatches, k);
 
-        // TODO : filter matches using descriptor distance ratio test
+        t = ((double)cv::getTickCount() - t) / cv::getTickFrequency();
+
+        if (k == 2)
+        {
+            float nearestNeighborDistanceRatio = 0.8;
+
+            for (size_t i = 0; i < knnMatches.size(); i++)
+            {
+                if (knnMatches[i][0].distance / knnMatches[i][1].distance < nearestNeighborDistanceRatio)
+                {
+                    matches.push_back(knnMatches[i][0]);
+                }
+            }
+        }
+        else
+        {
+            for (auto &knnMatch : knnMatches)
+            {
+                if (knnMatch.size())
+
+                {
+                    matches.insert(std::end(matches), std::begin(knnMatch), std::end(knnMatch));
+                }
+            }
+        }
+
+        float discaredPecentage = 1 - (matches.size() / (float)knnMatches.size());
+
+        cout << " (KNN) with k=" << k << " n=" << matches.size() << " matches in " << 1000 * t / 1.0
+             << " ms, discared percentage = " << discaredPecentage * 100 << " %" << endl;
     }
 
     // visualize results
