@@ -29,8 +29,9 @@ void matchDescriptors(cv::Mat &imgSource, cv::Mat &imgRef, vector<cv::KeyPoint> 
             descRef.convertTo(descRef, CV_32F);
         }
 
-        //... TODO : implement FLANN matching
         cout << "FLANN matching";
+        int normType = descriptorType.compare("DES_BINARY") == 0 ? cv::NORM_HAMMING : cv::NORM_L2;
+        matcher = cv::FlannBasedMatcher::create();
     }
 
     // perform matching task
