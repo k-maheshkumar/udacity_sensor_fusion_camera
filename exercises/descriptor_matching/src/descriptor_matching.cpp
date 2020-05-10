@@ -95,25 +95,146 @@ void matchDescriptors(cv::Mat &imgSource, cv::Mat &imgRef, vector<cv::KeyPoint> 
 
     cv::namedWindow(windowName, 7);
     cv::imshow(windowName, matchImg);
-    cv::waitKey(0);
 }
 
-int main()
+void doMatch(string kptSrcPath, string kptRefPath, string descSrcPath, string descRefPath,
+             string matcherType, string descriptorType, string selectorType, string windowName, bool crossCheck)
 {
     cv::Mat imgSource = cv::imread("../images/img1gray.png");
     cv::Mat imgRef = cv::imread("../images/img2gray.png");
 
-    vector<cv::KeyPoint> kptsSource, kptsRef; 
-    readKeypoints("../dat/C35A5_KptsSource_BRISK_large.dat", kptsSource);
-    readKeypoints("../dat/C35A5_KptsRef_BRISK_large.dat", kptsRef);
+    vector<cv::KeyPoint> kptsSource, kptsRef;
 
-    cv::Mat descSource, descRef; 
-    readDescriptors("../dat/C35A5_DescSource_BRISK_large.dat", descSource);
-    readDescriptors("../dat/C35A5_DescRef_BRISK_large.dat", descRef);
+    readKeypoints(kptSrcPath.c_str(), kptsSource);
+    readKeypoints(kptRefPath.c_str(), kptsRef);
+
+    cv::Mat descSource, descRef;
+
+    readDescriptors(descSrcPath.c_str(), descSource);
+    readDescriptors(descRefPath.c_str(), descRef);
 
     vector<cv::DMatch> matches;
-    string matcherType = "MAT_BF"; 
-    string descriptorType = "DES_BINARY"; 
-    string selectorType = "SEL_NN"; 
-    matchDescriptors(imgSource, imgRef, kptsSource, kptsRef, descSource, descRef, matches, descriptorType, matcherType, selectorType);
+
+    matchDescriptors(imgSource, imgRef, kptsSource, kptsRef, descSource, descRef, matches, descriptorType, matcherType, selectorType, crossCheck, windowName);
+}
+
+void doMatch(string dataset, string matcherType, string descriptorType, string selectorType, string windowName, bool crossCheck)
+{
+    string kptSrcPath, kptRefPath, descSrcPath, descRefPath;
+
+    if (dataset.compare("small") == 0)
+    {
+        kptSrcPath = "../dat/C35A5_KptsSource_BRISK_small.dat";
+        kptRefPath = "../dat/C35A5_KptsRef_BRISK_small.dat";
+        descSrcPath = "../dat/C35A5_DescSource_BRISK_small.dat";
+        descRefPath = "../dat/C35A5_DescRef_BRISK_small.dat";
+    }
+    if (dataset.compare("large") == 0)
+    {
+        kptSrcPath = "../dat/C35A5_KptsSource_BRISK_large.dat";
+        kptRefPath = "../dat/C35A5_KptsRef_BRISK_large.dat";
+        descSrcPath = "../dat/C35A5_DescSource_BRISK_large.dat";
+        descRefPath = "../dat/C35A5_DescRef_BRISK_large.dat";
+    }
+    if (dataset.compare("SIFT") == 0)
+    {
+        kptSrcPath = "../dat/C35A5_KptsSource_SIFT.dat";
+        kptRefPath = "../dat/C35A5_KptsRef_SIFT.dat";
+        descSrcPath = "../dat/C35A5_DescSource_SIFT.dat";
+        descRefPath = "../dat/C35A5_DescRef_SIFT.dat";
+    }
+
+    doMatch(kptSrcPath, kptRefPath, descSrcPath, descRefPath, matcherType, descriptorType, selectorType, windowName, crossCheck);
+}
+
+int main()
+{
+
+    std::cout << "---------------------------------------------- MAT_BF ----------------------------------------------" << endl;
+
+    std::cout << "----------------------- BRISK small -----------------------" << endl;
+
+    doMatch("small", "MAT_BF", "DES_BINARY", "SEL_NN",
+            "BRISK small - NN: Matching keypoints between two camera images crossCheck: OFF", false);
+
+    doMatch("small", "MAT_BF", "DES_BINARY", "SEL_NN",
+            "BRISK small - NN: Matching keypoints between two camera images crossCheck: OFF", true);
+
+    doMatch("small", "MAT_BF", "DES_BINARY", "SEL_KNN",
+            "BRISK small - KNN: Matching keypoints between two camera images crossCheck: OFF", false);
+
+    doMatch("small", "MAT_BF", "DES_BINARY", "SEL_KNN",
+            "BRISK small - KNN: Matching keypoints between two camera images crossCheck: OFF", true);
+
+    std::cout << "*********************** BRISK small ***********************" << endl;
+
+    std::cout << "----------------------- BRISK large -----------------------" << endl;
+
+    doMatch("large", "MAT_BF", "DES_BINARY", "SEL_NN",
+            "BRISK large - NN: Matching keypoints between two camera images crossCheck: OFF", false);
+
+    doMatch("large", "MAT_BF", "DES_BINARY", "SEL_NN",
+            "BRISK large - NN: Matching keypoints between two camera images crossCheck: OFF", true);
+
+    doMatch("large", "MAT_BF", "DES_BINARY", "SEL_KNN",
+            "BRISK large - KNN: Matching keypoints between two camera images crossCheck: OFF", false);
+
+    doMatch("large", "MAT_BF", "DES_BINARY", "SEL_KNN",
+            "BRISK large - KNN: Matching keypoints between two camera images crossCheck: OFF", true);
+
+    std::cout << "*********************** BRISK large ***********************" << endl;
+
+    std::cout << "----------------------- SIFT -----------------------" << endl;
+
+    doMatch("SIFT", "MAT_BF", "NORM_L2", "SEL_NN",
+            "SIFT - NN: Matching keypoints between two camera images crossCheck: OFF", false);
+
+    doMatch("SIFT", "MAT_BF", "NORM_L2", "SEL_NN",
+            "SIFT - NN: Matching keypoints between two camera images crossCheck: OFF", true);
+
+    doMatch("SIFT", "MAT_BF", "NORM_L2", "SEL_KNN",
+            "SIFT - KNN: Matching keypoints between two camera images crossCheck: OFF", false);
+
+    doMatch("SIFT", "MAT_BF", "NORM_L2", "SEL_KNN",
+            "SIFT - KNN: Matching keypoints between two camera images crossCheck: OFF", true);
+
+    std::cout << "*********************** SIFT ***********************" << endl;
+
+    std::cout << "*********************************************** MAT_BF **********************************************" << endl;
+
+    std::cout << "---------------------------------------------- MAT_FLANN ----------------------------------------------" << endl;
+
+    std::cout << "----------------------- BRISK large -----------------------" << endl;
+
+    doMatch("large", "MAT_FLANN", "DES_BINARY", "SEL_NN",
+            "FLANN large - NN: Matching keypoints between two camera images crossCheck: OFF", false);
+
+    doMatch("large", "MAT_FLANN", "DES_BINARY", "SEL_NN",
+            "FLANN large - NN: Matching keypoints between two camera images crossCheck: OFF", true);
+
+    doMatch("large", "MAT_FLANN", "DES_BINARY", "SEL_KNN",
+            "FLANN large - KNN: Matching keypoints between two camera images crossCheck: OFF", false);
+
+    doMatch("large", "MAT_FLANN", "DES_BINARY", "SEL_KNN",
+            "FLANN large - KNN: Matching keypoints between two camera images crossCheck: OFF", true);
+
+    std::cout << "*********************** BRISK large ***********************" << endl;
+
+    std::cout << "----------------------- SIFT -----------------------" << endl;
+
+    doMatch("SIFT", "MAT_FLANN", "DES_BINARY", "SEL_NN",
+            "SIFT - NN: Matching keypoints between two camera images crossCheck: OFF",
+            false /* can also be true, this value is not used anyways*/);
+
+    doMatch("SIFT", "MAT_FLANN", "DES_BINARY", "SEL_KNN",
+            "SIFT - KNN: Matching keypoints between two camera images crossCheck: OFF", false);
+
+    doMatch("SIFT", "MAT_FLANN", "DES_BINARY", "SEL_KNN",
+            "SIFT - KNN: Matching keypoints between two camera images crossCheck: OFF", true);
+
+    std::cout << "*********************** SIFT ***********************" << endl;
+
+    std::cout << "*********************************************** MAT_FLANN **********************************************" << endl;
+
+    cv::waitKey(0);
 }
