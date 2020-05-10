@@ -10,11 +10,8 @@
 using namespace std;
 
 void matchDescriptors(cv::Mat &imgSource, cv::Mat &imgRef, vector<cv::KeyPoint> &kPtsSource, vector<cv::KeyPoint> &kPtsRef, cv::Mat &descSource, cv::Mat &descRef,
-                      vector<cv::DMatch> &matches, string descriptorType, string matcherType, string selectorType)
+                      vector<cv::DMatch> &matches, string descriptorType, string matcherType, string selectorType, bool crossCheck, string windowName)
 {
-
-    // configure matcher
-    bool crossCheck = false;
     cv::Ptr<cv::DescriptorMatcher> matcher;
 
     if (matcherType.compare("MAT_BF") == 0)
@@ -58,7 +55,6 @@ void matchDescriptors(cv::Mat &imgSource, cv::Mat &imgRef, vector<cv::KeyPoint> 
     cv::drawMatches(imgSource, kPtsSource, imgRef, kPtsRef, matches,
                     matchImg, cv::Scalar::all(-1), cv::Scalar::all(-1), vector<char>(), cv::DrawMatchesFlags::DRAW_RICH_KEYPOINTS);
 
-    string windowName = "Matching keypoints between two camera images (best 50)";
     cv::namedWindow(windowName, 7);
     cv::imshow(windowName, matchImg);
     cv::waitKey(0);
