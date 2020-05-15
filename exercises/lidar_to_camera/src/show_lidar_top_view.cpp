@@ -46,6 +46,8 @@ void showLidarTopview()
         cv::line(topviewImg, cv::Point(0, y), cv::Point(imageSize.width, y), cv::Scalar(255, 0, 0));
     }
 
+    cv::resize(topviewImg, topviewImg, cv::Size(500, 1000), 0, 0, cv::INTER_CUBIC);
+
     // display image
     string windowName = "Top-View Perspective of LiDAR data";
     cv::namedWindow(windowName, 2);
