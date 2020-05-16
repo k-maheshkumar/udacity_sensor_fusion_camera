@@ -103,6 +103,85 @@ void showLidarTopview(std::vector<LidarPoint> &lidarPoints, cv::Size worldSize, 
     cv::waitKey(0); // wait for key to be pressed
 }
 
+void showBoundedLidarTopview(std::vector<BoundingBox> &boundingBox, cv::Size worldSize, cv::Size imageSize, bool bWait)
+{
+    // create topview image
+    cv::Mat topviewImg(imageSize, CV_8UC3, cv::Scalar(0, 0, 0));
+
+    for (BoundingBox bbox : boundingBox)
+    {
+        if (bbox.lidarPoints.size())
+        {
+            int xMin = 1e8, yMin = 1e8, xMax = 0, yMax = 0;
+            int xMinWorld = 1e8, yMinWorld = 1e8, xMaxWorld = 0, yMaxWorld = 0;
+
+            cv::RNG rng(bbox.boxID);
+            cv::Scalar pointsColor = cv::Scalar(rng.uniform(0, 200), rng.uniform(0, 200), rng.uniform(0, 200));
+
+            // plot Lidar points into image
+            for (LidarPoint lidarPoint : bbox.lidarPoints)
+            {
+                float xw = lidarPoint.x; // world position in m with x facing forward from sensor
+                float yw = lidarPoint.y; // world position in m with y facing left from sensor
+
+                int y = (-xw * imageSize.height / worldSize.height) + imageSize.height;
+                int x = (-yw * imageSize.height / worldSize.height) + imageSize.width / 2;
+
+                xMin = x < xMin ? x : xMin;
+                yMin = y < yMin ? y : yMin;
+
+                xMax = x > xMax ? x : xMax;
+                yMax = y > yMax ? y : yMax;
+
+                xMinWorld = xw < xMinWorld ? xw : xMinWorld;
+                yMinWorld = yw < yMinWorld ? yw : yMinWorld;
+
+                xMaxWorld = xw > xMaxWorld ? xw : xMaxWorld;
+                yMaxWorld = yw > yMaxWorld ? yw : yMaxWorld;
+
+                // if (xMin >= 1e5)
+                //     printf("x: %d, y: %d \n", x, y);
+
+                cv::circle(topviewImg, cv::Point(x, y), 5, pointsColor, -1);
+            }
+
+            cv::rectangle(topviewImg, cv::Point(xMin, yMin), cv::Point(xMax, yMax), cv::Scalar(255, 255, 255), 2);
+
+            char text[200];
+            sprintf(text, "id: %d", bbox.boxID);
+            cv::putText(topviewImg, text, cv::Point2d(xMin, yMin - 60), cv::FONT_ITALIC, 1, pointsColor);
+
+            int width = xMaxWorld - xMinWorld;
+            int height = yMaxWorld - yMinWorld;
+
+            int x = int(xMinWorld + width / 2);
+            int y = int(xMinWorld + width / 2);
+
+            sprintf(text, "x: %d, y: %d, w: %d, h: %d", x, y, width, height);
+            cv::putText(topviewImg, text, cv::Point2d(xMin, yMin - 20), cv::FONT_ITALIC, 1, pointsColor);
+        }
+    }
+
+    // plot distance markers
+    float lineSpacing = 2.0; // gap between distance markers
+    int nMarkers = floor(worldSize.height / lineSpacing);
+    for (size_t i = 0; i < nMarkers; ++i)
+    {
+        int y = (-(i * lineSpacing) * imageSize.height / worldSize.height) + imageSize.height;
+        cv::line(topviewImg, cv::Point(0, y), cv::Point(imageSize.width, y), cv::Scalar(255, 0, 0));
+    }
+
+    cv::resize(topviewImg, topviewImg, cv::Size(imageSize.width / 2, imageSize.height / 2), 0, 0, cv::INTER_CUBIC);
+
+    // display image
+    string windowName = "Top-View Perspective of LiDAR data";
+    cv::namedWindow(windowName, 2);
+    cv::imshow(windowName, topviewImg);
+
+    if (bWait)
+        cv::waitKey(0); // wait for key to be pressed
+}
+
 void clusterLidarWithROI(std::vector<BoundingBox> &boundingBoxes, std::vector<LidarPoint> &lidarPoints)
 {
     // store calibration data in OpenCV matrices
@@ -167,13 +246,16 @@ int main()
     readBoundingBoxes("../dat/C53A3_currBoundingBoxes.dat", boundingBoxes);
 
     clusterLidarWithROI(boundingBoxes, lidarPoints);
-    for (auto it = boundingBoxes.begin(); it != boundingBoxes.end(); ++it)
-    {
-        if (it->lidarPoints.size() > 0)
-        {
-            showLidarTopview(it->lidarPoints, cv::Size(10.0, 25.0), cv::Size(1000, 2000));
-        }
-    }
+
+    // for (auto it = boundingBoxes.begin(); it != boundingBoxes.end(); ++it)
+    // {
+    //     if (it->lidarPoints.size() > 0)
+    //     {
+    //         showLidarTopview(it->lidarPoints, cv::Size(10.0, 25.0), cv::Size(1000, 2000));
+    //     }
+    // }
+
+    showBoundedLidarTopview(boundingBoxes, cv::Size(10.0, 25.0), cv::Size(1000, 2000), true);
 
     return 0;
 }
