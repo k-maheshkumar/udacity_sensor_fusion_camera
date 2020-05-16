@@ -40,7 +40,10 @@ void showLidarTopview()
         red = 255 - 255 * abs(it->x) / worldSize.height;
         green = 255 * abs(it->x) / worldSize.height;
 
-        cv::circle(topviewImg, cv::Point(x, y), 5, cv::Scalar(0, green, red), -1);
+        if (zw > -1.5)
+        {
+            cv::circle(topviewImg, cv::Point(x, y), 5, cv::Scalar(0, green, red), -1);
+        }
     }
 
     // plot distance markers
