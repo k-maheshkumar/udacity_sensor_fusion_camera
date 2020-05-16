@@ -1,3 +1,6 @@
 [submodule "midterm_project"]
 	path = midterm_project
 	url = git@github.com:k-maheshkumar/udacity_sensor_fusion_camera_midterm_project.git
+[submodule "final_project"]
+	path = final_project
+	url = https://github.com/udacity/SFND_3D_Object_Tracking.git
